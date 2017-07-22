@@ -6,6 +6,5 @@
 ![](https://github.com/zyyoona7/HeartView/blob/master/images/heart_view.gif)
 
 #### 感谢
-[Android贝塞尔曲线原理分析](http://www.qingpingshan.com/rjbc/az/273144.html)
-
+[Android贝塞尔曲线原理分析](http://www.qingpingshan.com/rjbc/az/273144.html)<br>
 [hiai_HeartView](https://github.com/hiai/hiai_HeartView)
