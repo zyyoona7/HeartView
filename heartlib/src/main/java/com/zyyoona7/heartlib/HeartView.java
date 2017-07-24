@@ -65,6 +65,15 @@ public class HeartView extends SurfaceView implements SurfaceHolder.Callback, Ru
         mHearts = new ConcurrentLinkedQueue<>();
         mMatrix = new Matrix();
         mBitmapSparseArray = new SparseArray<>();
+        initBitmap(context);
+    }
+
+    /**
+     * 初始化bitmap
+     *
+     * @param context
+     */
+    private void initBitmap(Context context) {
         Bitmap bitmap1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.heart_default);
         Bitmap bitmap2 = BitmapFactory.decodeResource(context.getResources(), R.drawable.ss_heart1);
         Bitmap bitmap3 = BitmapFactory.decodeResource(context.getResources(), R.drawable.ss_heart2);
@@ -119,27 +128,7 @@ public class HeartView extends SurfaceView implements SurfaceHolder.Callback, Ru
             try {
                 canvas = getHolder().lockCanvas();
                 if (canvas != null) {
-                    //清屏~
-                    canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-                    for (Heart heart : mHearts) {
-                        if (mBitmapSparseArray.get(heart.getType()) == null) {
-                            continue;
-                        }
-                        mMatrix.setTranslate(0, 0);
-                        //位移到x,y
-                        mMatrix.postTranslate(heart.getX(), heart.getY());
-                        //缩放
-//                        mMatrix.postScale()
-                        //画bitmap
-                        canvas.drawBitmap(mBitmapSparseArray.get(heart.getType()), mMatrix, mPaint);
-                        //计算时间
-                        if (heart.getT() < 1) {
-                            heart.setT(heart.getT() + heart.getSpeed());
-                            handleBezierXY(heart);
-                        } else {
-                            removeHeart(heart);
-                        }
-                    }
+                    drawHeart(canvas);
                 }
             } catch (Exception e) {
                 Log.e(TAG, "run: " + e.getMessage());
@@ -153,6 +142,39 @@ public class HeartView extends SurfaceView implements SurfaceHolder.Callback, Ru
     }
 
     /**
+     * 画集合内的心形
+     *
+     * @param canvas
+     */
+    private void drawHeart(Canvas canvas) {
+        //清屏~
+        canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+        for (Heart heart : mHearts) {
+            if (mBitmapSparseArray.get(heart.getType()) == null) {
+                continue;
+            }
+            //会覆盖掉之前的x,y数值
+            mMatrix.setTranslate(0, 0);
+            //位移到x,y
+            mMatrix.postTranslate(heart.getX(), heart.getY());
+            //缩放
+            //mMatrix.postScale();
+            //旋转
+            //mMatrix.postRotate();
+            //画bitmap
+            canvas.drawBitmap(mBitmapSparseArray.get(heart.getType()), mMatrix, mPaint);
+            //计算时间
+            if (heart.getT() < 1) {
+                heart.setT(heart.getT() + heart.getSpeed());
+                //计算下次画的时候，x，y坐标
+                handleBezierXY(heart);
+            } else {
+                removeHeart(heart);
+            }
+        }
+    }
+
+    /**
      * 计算实时的点坐标
      *
      * @param heart
@@ -161,8 +183,15 @@ public class HeartView extends SurfaceView implements SurfaceHolder.Callback, Ru
         //三阶贝塞尔曲线函数
         //x = (float) (Math.pow((1 - t), 3) * start.x + 3 * t * Math.pow((1 - t), 2) * control1.x + 3 * Math.pow(t, 2) * (1 - t) * control2.x + Math.pow(t, 3) * end.x);
         //y = (float) (Math.pow((1 - t), 3) * start.y + 3 * t * Math.pow((1 - t), 2) * control1.y + 3 * Math.pow(t, 2) * (1 - t) * control2.y + Math.pow(t, 3) * end.y);
-        float x = (float) (Math.pow((1 - heart.getT()), 3) * heart.getStartX() + 3 * heart.getT() * Math.pow((1 - heart.getT()), 2) * heart.getControl1X() + 3 * Math.pow(heart.getT(), 2) * (1 - heart.getT()) * heart.getControl2X() + Math.pow(heart.getT(), 3) * heart.getEndX());
-        float y = (float) (Math.pow((1 - heart.getT()), 3) * heart.getStartY() + 3 * heart.getT() * Math.pow((1 - heart.getT()), 2) * heart.getControl1Y() + 3 * Math.pow(heart.getT(), 2) * (1 - heart.getT()) * heart.getControl2Y() + Math.pow(heart.getT(), 3) * heart.getEndY());
+        float x = (float) (Math.pow((1 - heart.getT()), 3) * heart.getStartX() +
+                3 * heart.getT() * Math.pow((1 - heart.getT()), 2) * heart.getControl1X() +
+                3 * Math.pow(heart.getT(), 2) * (1 - heart.getT()) * heart.getControl2X() +
+                Math.pow(heart.getT(), 3) * heart.getEndX());
+
+        float y = (float) (Math.pow((1 - heart.getT()), 3) * heart.getStartY() +
+                3 * heart.getT() * Math.pow((1 - heart.getT()), 2) * heart.getControl1Y() +
+                3 * Math.pow(heart.getT(), 2) * (1 - heart.getT()) * heart.getControl2Y() +
+                Math.pow(heart.getT(), 3) * heart.getEndY());
 
         heart.setX(x);
         heart.setY(y);
